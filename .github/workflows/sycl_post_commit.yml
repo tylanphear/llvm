@@ -8,17 +8,9 @@ on:
     - llvmspirv_pulldown
 
 jobs:
-  # This job generates matrix of tests for SYCL End-to-End tests
-  test_matrix:
-    name: Generate Test Matrix
-    if: github.repository == 'intel/llvm'
-    uses: ./.github/workflows/sycl_gen_test_matrix.yml
-    with:
-      lts_config: "l0_gen12;win_l0_gen12"
   linux_self_prod:
     name: Linux (Self build + shared libraries + no-assertions)
     if: github.repository == 'intel/llvm'
-    needs: test_matrix
     uses: ./.github/workflows/sycl_linux_build_and_test.yml
     with:
       build_cache_root: "/__w/llvm"
@@ -29,18 +21,52 @@ jobs:
       build_image: "ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:build"
       cc: clang
       cxx: clang++
-      lts_matrix: ${{ needs.test_matrix.outputs.lts_lx_matrix }}
-      cts_matrix: ${{ needs.test_matrix.outputs.cts_matrix }}
-      lts_aws_matrix: ${{ needs.test_matrix.outputs.lts_aws_matrix }}
       merge_ref: ''
+
+  linux_test:
+    name: Linux E2E tests
+    needs: linux_self_prod
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Intel
+            runner: '["Linux", "gen12"]'
+            image: ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:latest
+            image_options: -u 1001 --device=/dev/dri --privileged --cap-add SYS_ADMIN
+            target_devices: ext_oneapi_level_zero:gpu
+            reset_gpu: true
+    uses: ./.github/workflows/sycl_linux_run_tests.yml
+    with:
+      name: ${{ matrix.name }}
+      runner: ${{ matrix. runner }}
+      image: ${{ matrix.image }}
+      image_options: ${{ matrix.image_options }}
+      extra_cmake_args: ${{ matrix.extra_cmake_args }}
+      target_devices: ${{ matrix.target_devices }}
+      reset_gpu: ${{ matrix.reset_gpu }}
+
+      ref: ${{ inputs.ref }}
+      merge_ref: ''
+
+      sycl_toolchain_artifact: sycl_linux_sprod_shared
+      sycl_toolchain_archive: llvm_sycl.tar.zst
+      sycl_toolchain_decompress_command: zst
+
+  win_test_matrix:
+    name: Generate Test Matrix
+    if: github.repository == 'intel/llvm'
+    uses: ./.github/workflows/sycl_gen_test_matrix.yml
+    with:
+      lts_config: "win_l0_gen12"
 
   windows_default:
     name: Windows
-    needs: test_matrix
+    needs: win_test_matrix
     if: github.repository == 'intel/llvm'
     uses: ./.github/workflows/sycl_windows_build_and_test.yml
     with:
-      lts_matrix: ${{ needs.test_matrix.outputs.lts_wn_matrix }}
+      lts_matrix: ${{ needs.win_test_matrix.outputs.lts_wn_matrix }}
 
   macos_default:
     name: macOS
