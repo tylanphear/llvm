@@ -32,11 +32,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Intel
-            runner: '["Linux", "gen12"]'
+          - name: Intel L0
+            runner: '["Linux", "gen9"]'
             image: ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:latest
             image_options: -u 1001 --device=/dev/dri --privileged --cap-add SYS_ADMIN
             target_devices: ext_oneapi_level_zero:gpu
+            reset_gpu: true
+          - name: Intel OpenCL
+            runner: '["Linux", "gen9"]'
+            image: ghcr.io/intel/llvm/sycl_ubuntu2204_nightly:latest
+            image_options: -u 1001 --device=/dev/dri --privileged --cap-add SYS_ADMIN
+            target_devices: opencl:gpu
             reset_gpu: true
     uses: ./.github/workflows/sycl_linux_run_tests.yml
     with:
