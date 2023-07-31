@@ -6,7 +6,7 @@
 ; RUN: llvm-spirv -r -emit-opaque-pointers=0 %t.spv -o %t.rev.bc
 ; RUN: llvm-dis -opaque-pointers=0 < %t.rev.bc | FileCheck %s --check-prefix=CHECK-LLVM
 
-; CHECK-LLVM: call spir_func float @_Z11read_imagef20ocl_image2d_depth_ro11ocl_samplerDv2_i(ptr
+; CHECK-LLVM: call spir_func float @_Z11read_imagef20ocl_image2d_depth_ro11ocl_samplerDv2_i(%opencl.image2d_depth_ro_t
 
 ; CHECK-SPIRV-DAG: 7 ImageSampleExplicitLod [[RetType:[0-9]+]] [[RetID:[0-9]+]] {{[0-9]+}} {{[0-9]+}} 2 {{[0-9]+}}
 ; CHECK-SPIRV-DAG: 4 TypeVector [[RetType]] {{[0-9]+}} 4

@@ -5,7 +5,7 @@
 ; RUN: llvm-spirv -r -emit-opaque-pointers=0 %t.spv -o %t.rev.bc
 ; RUN: llvm-dis -opaque-pointers=0 < %t.rev.bc | FileCheck %s --check-prefix=CHECK-LLVM
 
-; CHECK-LLVM: call spir_func <4 x float> @_Z11read_imagef19ocl_image2d_msaa_roDv2_ii(ptr
+; CHECK-LLVM: call spir_func <4 x float> @_Z11read_imagef19ocl_image2d_msaa_roDv2_ii(%opencl.image2d_msaa_ro_t
 
 ; CHECK-SPIRV: 7 ImageRead {{[0-9]+}} {{[0-9]+}} {{[0-9]+}} {{[0-9]+}} 64 {{[0-9]+}}
 
