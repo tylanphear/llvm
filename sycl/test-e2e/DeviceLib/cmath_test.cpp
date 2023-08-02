@@ -7,9 +7,6 @@
 // RUN: %{build} -fno-builtin -fsycl-device-lib-jit-link %{mathflags} -o %t.out
 // RUN: %if !gpu %{ %{run} %t.out %}
 
-// TODO: fix unexpected intrinsic error
-// XFAIL: *
-
 #include "math_utils.hpp"
 #include <cmath>
 #include <cstdint>
